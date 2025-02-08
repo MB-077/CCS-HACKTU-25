@@ -5,6 +5,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from rest_framework.authtoken.models import Token
+from django.utils import timezone
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, first_name, last_name, phone_number, email=None, password=None):
@@ -119,3 +121,37 @@ class UserImportantDetails(models.Model):
     class Meta:
         verbose_name = _('User Important Detail')
         verbose_name_plural = _('User Important Details')
+        
+
+class TokenUsageLog(models.Model):
+    token = models.ForeignKey(Token, on_delete=models.CASCADE, verbose_name=_('Token'))
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, verbose_name=_('User'))
+    ip_address = models.GenericIPAddressField(verbose_name=_('IP Address'))
+    user_agent = models.CharField(max_length=255, verbose_name=_('User Agent'))
+    path = models.CharField(max_length=255, verbose_name=_('Path'))
+    timestamp = models.DateTimeField(default=timezone.now, verbose_name=_('Timestamp'))
+    
+    def __str__(self):
+        return f"{self.user.full_name()} - {self.timestamp}"
+    
+    class Meta:
+        verbose_name = _('Token Usage Log')
+        verbose_name_plural = _('Token Usage Logs')
+        
+
+class UserStatus(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    online_status = models.BooleanField(default=False)
+    last_login = models.DateTimeField(null=True, blank=True)
+    
+    def getonlinestatus(self):
+        if self.online_status:
+            return 'Online'
+        return 'Offline'
+    
+    def __str__(self):
+        return f"{self.user.full_name()} is {self.getonlinestatus()}"
+    
+    class Meta:
+        verbose_name = _('User Status')
+        verbose_name_plural = _('User Statuses')
