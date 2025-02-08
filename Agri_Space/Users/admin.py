@@ -6,6 +6,10 @@ from django.utils.html import format_html
 from unfold.admin import ModelAdmin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.models import Group
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.admin import TokenAdmin
+from rest_framework.authtoken.models import TokenProxy
+from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
 class AccountAdmin(ModelAdmin):
     list_display = ('first_name', 'last_name', 'phone_number', 'email', 'is_active', 'date_joined', 'last_login', 'is_admin', 'is_staff', 'is_superuser')
@@ -32,7 +36,6 @@ class AccountAdmin(ModelAdmin):
     filter_horizontal = ()
     list_filter = ()
     
-
 admin.site.register(Account, AccountAdmin)
 
 
@@ -59,3 +62,22 @@ class UserImportantDetailsAdmin(ModelAdmin):
     search_fields = ('user', 'state', 'crop_grown',)
     
 admin.site.register(UserImportantDetails, UserImportantDetailsAdmin)
+
+
+class TokenProxyAdmin(UnfoldModelAdmin):
+    list_display = ('key', 'user', 'created',)
+    search_fields = ('key', 'user',)
+    list_filter = ('created',)
+    readonly_fields = ('key', 'user', 'created',)
+    ordering = ('-created',)
+    
+admin.site.unregister(TokenProxy)
+admin.site.register(TokenProxy, TokenProxyAdmin)
+
+
+class UserStatusAdmin(ModelAdmin):
+    list_display = ('user', 'online_status', 'last_login',)
+    list_filter = ('online_status', 'last_login',)
+    search_fields = ('user',)
+    
+admin.site.register(UserStatus, UserStatusAdmin)
