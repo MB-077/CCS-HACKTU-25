@@ -16,6 +16,14 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.db import transaction 
 
+# Email imports
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMessage, BadHeaderError
+
 # Debugging imports
 import logging
 logger = logging.getLogger(__name__)
@@ -169,7 +177,94 @@ def userprofile_view(request):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['DELETE'])
+def delete_account(request):
+    if request.method == 'DELETE':
+        user = request.user
+        user.delete()
+        return Response({'message': 'User deleted successfully'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+def forgotPassword(request):
+    if request.method == "POST":
+        email = request.data.get('email')
         
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email__iexact=email)
+            current_site = get_current_site(request)
+            mail_subject = 'Reset your password'
+            message = render_to_string('Users/reset_password_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            to_email = email
+            try:
+                send_email = EmailMessage(mail_subject, message, to=[to_email])
+                send_email.send()
+                return Response({'message': 'Password reset email has been sent to your email address.'}, status=status.HTTP_200_OK)
+            except BadHeaderError:
+                return Response({'error': 'Invalid header found.'}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({'error': 'Account does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        
+    return Response({'message': 'Forgot Password Complete'}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def resetpassword_validate(request, uidb64, token):
+    logger.debug(f"Received request: {request.method} {request.path}")
+    logger.debug(f"UID: {uidb64}, Token: {token}")
+
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        logger.debug(f"Decoded UID: {uid}")
+        user = User.objects.get(pk=uid)
+        if user is not None and default_token_generator.check_token(user, token):
+            request.session['uid'] = uid
+            return Response({'message': 'Valid link', 'uid': uid, 'token': token}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Link has expired or is invalid'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+        user = None
+        logger.error(f"Exception occurred: {str(e)}")
+        return Response({'error': 'User not found or invalid UID'}, status=status.HTTP_404_NOT_FOUND)
+        
+    
+@api_view(['POST'])   
+def reset_password(request):
+    if request.method == "POST":
+        data = request.data 
+        password = data.get('password')
+        confirm_password = data.get('confirm_password')
+        uid = data.get('uid')
+
+        if password and confirm_password:
+            if password == confirm_password:
+                if uid:
+                    try:
+                        user = User.objects.get(pk=uid)
+                        user.set_password(password)
+                        user.save()
+                        return Response({'message': 'Password reset successful'}, status=status.HTTP_200_OK)
+                    except User.DoesNotExist:
+                        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+                else:
+                    return Response({'error': 'Session expired'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'Passwords do not match'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Password and confirm password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
