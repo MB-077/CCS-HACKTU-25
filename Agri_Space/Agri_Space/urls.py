@@ -31,6 +31,7 @@ urlpatterns = [
     path('schema/', Schema.as_view()),
     path('telephony/', include('telephony.urls')),
     path('ml_model/', include('Ml_model.urls')),
+    path('translate/', include('translation.urls')),
 ]
 
 if settings.DEBUG:
