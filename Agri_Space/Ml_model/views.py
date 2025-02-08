@@ -206,10 +206,7 @@ class Irrigation_Prediction(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            data = self.encoder.transform([serializer.validated_data])
-        except EncoderError as e:
-            return Response({"error": f"Received the following errors while Encoding.\n\n{str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        data = self.encoder.transform([serializer.validated_data])
         
         try:
             prediction = self.model.predict(data)
