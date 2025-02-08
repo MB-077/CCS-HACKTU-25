@@ -178,3 +178,4 @@ __pycache__/
 *.pyc
 **/_pycache_/
 .env
+Agri_Space/Agri_Space/settings.py
