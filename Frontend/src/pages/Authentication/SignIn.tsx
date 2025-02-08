@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import { IoPersonOutline } from 'react-icons/io5';
+import { post } from '../../ApiUtils/apiUtils';
 
 interface IData {
   username: string;
@@ -15,9 +16,11 @@ const SignIn: React.FC = () => {
     password: '',
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(data, 'form submitted');
+    const response = await post(data, 'login/');
+    console.log(response);
+    console.log(data);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
