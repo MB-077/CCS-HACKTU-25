@@ -31,7 +31,7 @@ const SignUp = () => {
     console.log(data);
 
     localStorage.setItem('token', response.data.token);
-    navigate('/profile');
+    navigate('/userCredentials');
     setData(defaultData);
   };
 

@@ -1,68 +1,69 @@
-import React, { useEffect, useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 import CoverOne from '../images/cover/cover-01.png';
 import userSix from '../images/user/user-06.png';
-import { Link } from 'react-router-dom';
 
-const Profile = () => {
-  const [userData, setUserData] = useState({
+interface UserData {
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  email: string;
+  address: string;
+  land_area: string;
+  latitude: string;
+  longitude: string;
+  profileImage: string;
+  coverImage: string;
+}
+
+const Profile: React.FC = () => {
+  const [userData, setUserData] = useState<UserData>({
     first_name: 'John',
     last_name: 'Doe',
     phone_number: '123-456-7890',
     email: 'john.doe@example.com',
     address: '123 Main St, Springfield',
     land_area: '500 sq ft',
-    latitude: '12.9716', // Dummy value
-    longitude: '77.5946', // Dummy value
+    latitude: '12.9716',
+    longitude: '77.5946',
     profileImage: userSix,
     coverImage: CoverOne,
   });
 
-  const handleProfileImageChange = (event) => {
-    const file = event.target.files[0];
+  const handleImageChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    type: 'profileImage' | 'coverImage',
+  ) => {
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setUserData((prevData) => ({
           ...prevData,
-          profileImage: reader.result,
+          [type]: reader.result as string,
         }));
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleCoverImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserData((prevData) => ({
-          ...prevData,
-          coverImage: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     try {
+  //       const response = await fetch('/api/user/profile');
+  //       if (response.ok) {
+  //         const data: UserData = await response.json();
+  //         setUserData(data);
+  //       } else {
+  //         console.error('Failed to fetch user data');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching user data:', error);
+  //     }
+  //   };
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch('/api/user/profile'); // Adjust the API endpoint as needed
-        if (response.ok) {
-          const data = await response.json();
-          setUserData(data);
-        } else {
-          console.error('Failed to fetch user data');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+  //   fetchUserData();
+  // }, []);
 
   return (
     <>
@@ -70,8 +71,8 @@ const Profile = () => {
 
       <div className="overflow-hidden rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
         <div className="relative z-20 h-35 md:h-65">
-        <img
-            src={CoverOne}
+          <img
+            src={userData.coverImage}
             alt="profile cover"
             className="h-full w-full rounded-tl-sm rounded-tr-sm object-cover object-center"
           />
@@ -80,7 +81,12 @@ const Profile = () => {
               htmlFor="cover"
               className="flex cursor-pointer items-center justify-center gap-2 rounded bg-primary py-1 px-2 text-sm font-medium text-white hover:bg-opacity-90 xsm:px-4"
             >
-              <input type="file" name="cover" id="cover" className="sr-only" onChange={handleCoverImageChange} />
+              <input
+                type="file"
+                id="cover"
+                className="sr-only"
+                onChange={(e) => handleImageChange(e, 'coverImage')}
+              />
               <span>Edit</span>
             </label>
           </div>
@@ -88,17 +94,20 @@ const Profile = () => {
         <div className="px-4 pb-6 text-center lg:pb-8 xl:pb-11.5">
           <div className="relative z-30 mx-auto -mt-22 h-30 w-full max-w-30 rounded-full bg-white/20 p-1 backdrop-blur sm:h-44 sm:max-w-44 sm:p-3">
             <div className="relative drop-shadow-2">
-              <img src={userData.profileImage} alt="profile" className="rounded-full" />
+              <img
+                src={userData.profileImage}
+                alt="profile"
+                className="rounded-full"
+              />
               <label
                 htmlFor="profile"
                 className="absolute bottom-0 right-0 flex h-8.5 w-8.5 cursor-pointer items-center justify-center rounded-full bg-primary text-white hover:bg-opacity-90 sm:bottom-2 sm:right-2"
               >
                 <input
                   type="file"
-                  name="profile"
                   id="profile"
                   className="sr-only"
-                  onChange={handleProfileImageChange}
+                  onChange={(e) => handleImageChange(e, 'profileImage')}
                 />
                 <span>Edit</span>
               </label>
@@ -113,43 +122,70 @@ const Profile = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div>
-              <h4 className="mb-3.5 font-medium text-black dark:text-white">Address</h4>
+              <h4 className="mb-3.5 font-medium text-black dark:text-white">
+                Address
+              </h4>
               <p>{userData.address}</p>
             </div>
             <div>
-              <h4 className="mb-3.5 font-medium text-black dark:text-white">Land Area</h4>
+              <h4 className="mb-3.5 font-medium text-black dark:text-white">
+                Land Area
+              </h4>
               <p>{userData.land_area}</p>
             </div>
             <div>
-              <h4 className="mb-3.5 font-medium text-black dark:text-white">Location</h4>
+              <h4 className="mb-3.5 font-medium text-black dark:text-white">
+                Latitude
+              </h4>
               <p>{userData.latitude}</p>
             </div>
             <div>
-              <h4 className="mb-3.5 font-medium text-black dark:text-white">Longitude</h4>
+              <h4 className="mb-3.5 font-medium text-black dark:text-white">
+                Longitude
+              </h4>
               <p>{userData.longitude}</p>
             </div>
           </div>
 
           <div className="mt-6">
-            <h4 className="mb-3.5 font-medium text-black dark:text-white">Notification Preferences</h4>
+            <h4 className="mb-3.5 font-medium text-black dark:text-white">
+              Notification Preferences
+            </h4>
             <div className="flex items-center justify-center space-x-4">
               <div className="flex items-center">
-                <input type="checkbox" id="emailNotifications" className="mr-2" />
+                <input
+                  type="checkbox"
+                  id="emailNotifications"
+                  className="mr-2"
+                />
                 <label htmlFor="emailNotifications">Email Notifications</label>
               </div>
               <div className="flex items-center">
-                <input type="checkbox" id="pushNotifications" className="mr-2" />
+                <input
+                  type="checkbox"
+                  id="pushNotifications"
+                  className="mr-2"
+                />
                 <label htmlFor="pushNotifications">Push Notifications</label>
               </div>
               <div className="flex items-center">
-                <input type="checkbox" id="smsNotifications" className="mr-2" disabled />
-                <label htmlFor="smsNotifications" className="text-gray-500">SMS (available soon)</label>
+                <input
+                  type="checkbox"
+                  id="smsNotifications"
+                  className="mr-2"
+                  disabled
+                />
+                <label htmlFor="smsNotifications" className="text-gray-500">
+                  SMS (available soon)
+                </label>
               </div>
             </div>
           </div>
 
           <div className="mt-6">
-            <h4 className="mb-3.5 font-medium text-black dark:text-white">Additional General Settings</h4>
+            <h4 className="mb-3.5 font-medium text-black dark:text-white">
+              General Settings
+            </h4>
             <div className="flex items-center justify-center space-x-4">
               <div className="flex items-center">
                 <label className="mr-2">Language:</label>

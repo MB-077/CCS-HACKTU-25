@@ -16,10 +16,16 @@ import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
+<<<<<<< Updated upstream
 import PricingPage from './pages/Sensor/page';
 import IrrigationPage from './pages/Irrigation/Irrigation';
 import SensorDashboard from './pages/Dashboard/SensorDashboard';
 import LoginForm from './pages/Form/LoginForm';
+=======
+import LoginForm from './pages/Form/LoginForm';
+import SensorDashboard from './pages/Dashboard/SensorDashboard';
+
+>>>>>>> Stashed changes
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
@@ -79,6 +85,15 @@ function App() {
             <>
               <PageTitle title="Calendar | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <Calendar />
+            </>
+          }
+        />
+        <Route
+          path="/sensor-dashboard" // Add this route
+          element={
+            <>
+              <PageTitle title="Sensor Dashboard" />
+              <SensorDashboard />
             </>
           }
         />
