@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.timezone import localtime
 from django.utils import timezone
 import datetime
+from Users.models import Account
+
 
 class ESP32Device(models.Model):
     esp_device_id = models.CharField(max_length=50, unique=True, verbose_name=_("ESP Device ID"))
@@ -46,7 +48,6 @@ class SensorData(models.Model):
     
     def timestamp_local(self):
         local_timestamp = localtime(self.timestamp)
-        # Get milliseconds from microseconds
         millisec = local_timestamp.microsecond // 1000
         return local_timestamp.strftime(f"%Y-%m-%d %H:%M:%S") + f".{millisec:03d} {local_timestamp.tzname()}"
     
@@ -72,7 +73,6 @@ class ChildNodeSensorData(models.Model):
 
     def timestamp_local(self):
         local_timestamp = localtime(self.timestamp)
-        # Get milliseconds from microseconds
         millisec = local_timestamp.microsecond // 1000
         return local_timestamp.strftime(f"%Y-%m-%d %H:%M:%S") + f".{millisec:03d} {local_timestamp.tzname()}"
     
@@ -105,7 +105,6 @@ class RelayState(models.Model):
     last_updated = models.DateTimeField(auto_now=True, verbose_name=_("Last Updated"))
     
     def get_current_cycle_runtime(self):
-        """Gets the runtime (in seconds) for the current cycle if it matches today and the current time."""
         now = datetime.now()
         today = now.strftime('%A')
         current_time = now.time()
@@ -188,3 +187,23 @@ class TotalWaterUsage(models.Model):
     class Meta:
         verbose_name = _("Total Water Usage")
         verbose_name_plural = _("Total Water Usage")
+        
+
+class CropsOptimalConditions(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='crops_optimal_conditions', verbose_name=_("User"))
+    crop_name = models.CharField(max_length=255, verbose_name=_("Crop Name"))
+    optimal_temperature_lower_bound = models.FloatField(verbose_name=_("Optimal Lower Bound Temperature"))
+    optimal_temperature_upper_bound = models.FloatField(verbose_name=_("Optimal Upper Bound Temperature"))
+    optimal_humidity_lower_bound = models.FloatField(verbose_name=_("Optimal Lower Bound Humidity"))
+    optimal_humidity_upper_bound = models.FloatField(verbose_name=_("Optimal Upper Bound Humidity"))
+    optimal_soil_moisture_percentage_lower_bound = models.FloatField(verbose_name=_("Optimal Lower Bound Soil Moisture Percentage"))
+    optimal_soil_moisture_percentage_upper_bound = models.FloatField(verbose_name=_("Optimal Upper Bound Soil Moisture Percentage"))
+    optimal_lux_lower_bound = models.FloatField(verbose_name=_("Optimal Lower Bound Lux Level"))
+    optimal_lux_upper_bound = models.FloatField(verbose_name=_("Optimal Upper Bound Lux Level"))
+
+    def __str__(self):
+        return f"{self.crop_name} - {self.user.full_name()}"
+
+    class Meta:
+        verbose_name = _("Crops Optimal Conditions")
+        verbose_name_plural = _("Crops Optimal Conditions")

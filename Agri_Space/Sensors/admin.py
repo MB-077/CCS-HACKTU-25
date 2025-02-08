@@ -126,3 +126,12 @@ class TotalWaterUsageAdmin(ModelAdmin):
     readonly_fields = ('total_usage',)
     
 admin.site.register(TotalWaterUsage, TotalWaterUsageAdmin)
+
+
+class CropsOptimalConditionsAdmin(ModelAdmin):
+    list_display = [field.name for field in CropsOptimalConditions._meta.get_fields()]
+    list_filter = ('crop_name',)
+    search_fields = ('crop_name', 'user',)
+    ordering = ('crop_name',)
+    
+admin.site.register(CropsOptimalConditions, CropsOptimalConditionsAdmin)

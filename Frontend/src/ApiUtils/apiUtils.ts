@@ -19,3 +19,22 @@ export const post = async (data: Idata, endpoint: string) => {
     return error;
   }
 };
+
+export const logout = async () => {
+  try {
+    const api = `${apiKey}/logout/`;
+    const response = await axios.post(api, {
+      headers: {
+        Authorization: `Token ${localStorage.getItem('token')}`,
+      },
+    });
+    // console.log(response);
+
+    // localStorage.removeItem('token');
+
+    return response;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
