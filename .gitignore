@@ -184,3 +184,6 @@ poetry.lock
 Agri_Space/Agri_Space/settings.py
 /Agri_Space/Users/migrations
 migrations/
+Agri_Space/locale/
+
+/Agri_Space/templates/admin
