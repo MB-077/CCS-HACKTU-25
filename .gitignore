@@ -188,3 +188,6 @@ Agri_Space/locale/
 
 /Agri_Space/templates/admin
 Agri_Space/requirements.txt
+/Agri_Space/Ml_model/trained_data/optimal_conditions/
+/Agri_Space/Ml_model/csv_files/
+
