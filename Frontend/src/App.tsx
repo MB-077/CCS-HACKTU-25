@@ -16,6 +16,7 @@ import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
+import PricingPage from './pages/Sensor/page';
 import IrrigationPage from './pages/Irrigation/Irrigation';
 import SensorDashboard from './pages/Dashboard/SensorDashboard';
 function App() {
@@ -59,6 +60,15 @@ function App() {
             <>
               <PageTitle title="eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <ECommerce />
+            </>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <>
+              <PageTitle title="Products | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <PricingPage />
             </>
           }
         />
