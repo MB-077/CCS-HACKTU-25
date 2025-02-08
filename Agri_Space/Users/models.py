@@ -76,3 +76,45 @@ class Account(AbstractBaseUser):
     class Meta:
         verbose_name = _('Account')
         verbose_name_plural = _('Accounts')
+     
+        
+class UserProfile(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='profile', verbose_name=_('User'))
+    address_line_1 = models.CharField(max_length=100, blank=True, verbose_name=_('Address Line 1'))
+    address_line_2 = models.CharField(max_length=100, blank=True, verbose_name=_('Address Line 2'))
+    profile_picture = models.ImageField(upload_to='userprofile', null=True, blank=True, default='userprofile/userprofile.jpg', verbose_name=_('Profile Picture'))
+    country = models.CharField(max_length=50, blank=True, default='India', verbose_name=_('Country'))
+    state = models.CharField(max_length=50, blank=True, verbose_name=_('State'))
+    city = models.CharField(max_length=50, blank=True, verbose_name=_('City'))
+    district = models.CharField(max_length=50, blank=True, verbose_name=_('District'))
+    postal_code = models.CharField(max_length=50, blank=True, verbose_name=_('Postal Code'))
+    latitude = models.FloatField(blank=True, null=True, verbose_name=_('Latitude'))
+    longitude = models.FloatField(blank=True, null=True, verbose_name=_('Longitude'))
+    
+    def __str__(self):
+        return f"{self.user.first_name}"
+    
+    def full_address(self):
+        return f"{self.address_line_1} {self.address_line_2}"
+    
+    class Meta:
+        verbose_name = _('User Profile')
+        verbose_name_plural = _('User Profiles')
+        
+
+class UserImportantDetails(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='important_details', verbose_name=_('User'))
+    state = models.CharField(max_length=50, blank=True, verbose_name=_('State'))
+    crop_grown = models.CharField(max_length=50, blank=True, verbose_name=_('Crop Grown'))
+    land_area = models.FloatField(blank=True, null=True, default=0, verbose_name=_('Land Area'))
+    planting_date = models.DateField(blank=True, null=True, verbose_name=_('Planting Date'))
+    receive_email = models.BooleanField(default=True, verbose_name=_('Receive Email'))
+    receive_push_notification = models.BooleanField(default=False, verbose_name=_('Receive Email'))
+    receive_sms = models.BooleanField(default=False, verbose_name=_('Receive SMS'))
+    
+    def __str__(self):
+        return f"{self.user.full_name()}'s Important Details"
+    
+    class Meta:
+        verbose_name = _('User Important Detail')
+        verbose_name_plural = _('User Important Details')
