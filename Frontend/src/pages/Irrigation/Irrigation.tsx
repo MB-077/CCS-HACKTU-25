@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import dayjs from 'dayjs';
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker';
 
 export default function IrrigationPage() {
   const [relayOn, setRelayOn] = useState(false);
-  const [startTime, setStartTime] = useState('06:00');
+  const [startTime, setStartTime] = useState(Date.now());
   const [duration, setDuration] = useState(30);
   const [flowRate, setFlowRate] = useState(10);
   const [individualUsage, setIndividualUsage] = useState(300);
@@ -19,6 +24,10 @@ export default function IrrigationPage() {
     return date;
   });
 
+  const currentDate = new Date();
+  const currentDay = currentDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+  });
   return (
     <div className="p-8 bg-gray-100 min-h-screen flex flex-col items-center">
       <h1 className="text-4xl font-bold mb-6 text-gray-800">
@@ -40,6 +49,14 @@ export default function IrrigationPage() {
           <p className="text-gray-600 text-sm">
             Toggle the relay to manually start or stop the irrigation system.
           </p>
+          {/* <p>{Date.now()}</p> */}
+
+          <p className="text-sm text-gray-600">
+            <strong>Date:</strong> {format(currentDate, 'PPpp')}
+          </p>
+          <p className="text-sm text-gray-600">
+            <strong>Day:</strong> {currentDay}
+          </p>
         </div>
 
         {/* Irrigation Cycle */}
@@ -48,15 +65,21 @@ export default function IrrigationPage() {
           <p className="text-gray-600 text-sm mb-3">
             Set the start time and duration for the irrigation cycle.
           </p>
-          <label className="block text-sm text-gray-600">Start Time</label>
-          <input
-            type="time"
-            value={startTime}
-            onChange={(e) => setStartTime(e.target.value)}
-            className="w-full p-2 border rounded-md shadow-sm"
-          />
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={['StaticTimePicker']}>
+              <DemoItem label="Static variant">
+                <StaticTimePicker defaultValue={dayjs(startTime)} />
+              </DemoItem>
+            </DemoContainer>
+          </LocalizationProvider>
+
+          <p>Start Time : {startTime}</p>
+
           <div className="mt-2">
-            <label className="block text-sm text-gray-600">Duration (min)</label>
+            <label className="block text-sm text-gray-600">
+              Duration (min)
+            </label>
             <input
               type="range"
               min="1"
@@ -92,17 +115,28 @@ export default function IrrigationPage() {
           <p className="text-gray-600 text-sm mb-3">
             Real-time data on water usage and flow rate.
           </p>
-          <p className="text-sm text-gray-600">💧 Flow Rate: {flowRate} L/min</p>
-          <p className="text-sm text-gray-600">🚰 Individual Usage: {individualUsage} L</p>
-          <p className="text-sm text-gray-600">⏳ Total Duration: {totalMeasurementDuration} sec</p>
-          <p className="text-lg font-semibold text-gray-600">🔹Total Water Used: {totalWaterUsage} L</p>
+          <p className="text-sm text-gray-600">
+            💧 Flow Rate: {flowRate} L/min
+          </p>
+          <p className="text-sm text-gray-600">
+            🚰 Individual Usage: {individualUsage} L
+          </p>
+          <p className="text-sm text-gray-600">
+            ⏳ Total Duration: {totalMeasurementDuration} sec
+          </p>
+          <p className="text-lg font-semibold text-gray-600">
+            🔹Total Water Used: {totalWaterUsage} L
+          </p>
         </div>
 
         {/* Calendar for Multi-Irrigation */}
         <div className="p-6 bg-white shadow-lg rounded-xl col-span-1 md:col-span-2 w-full">
-          <span className="text-xl font-semibold">Irrigation Schedule Calendar</span>
+          <span className="text-xl font-semibold">
+            Irrigation Schedule Calendar
+          </span>
           <p className="text-gray-600 text-sm mb-3">
-            View past and upcoming irrigation cycles. Multiple irrigations per day are highlighted.
+            View past and upcoming irrigation cycles. Multiple irrigations per
+            day are highlighted.
           </p>
         </div>
       </div>
