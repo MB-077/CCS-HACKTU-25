@@ -1,9 +1,18 @@
-from django.shortcuts import render
+# Django & DRF Imports
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+# Third-party Libraries
+import joblib
+import pandas as pd
+from sklearn.exceptions import NotFittedError
 
 # Local Imports
 from .serializers import (
     Crop_Recommendation_Serializer, 
     Fertilizer_Prediction_Serializer, 
+    Yield_Prediction_Serializer,
 )
 
 # Create your views here.
@@ -83,6 +92,44 @@ class Fertilizer_Prediction(APIView):
             prediction = self.fertilizer_model.predict(data)
             result = prediction[0]
             return Response({"prediction": result}, status=status.HTTP_200_OK)
+        except IndexError:
+            return Response({"error": "Model did not return a prediction."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class Yield_Prediction(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.model = self.load_model()
+
+    @staticmethod
+    def load_model():
+        """Load the ML model with error handling."""
+        model_path = 'Ml_model/trained_data/yield_prediction/yield_prediction_model.pkl'
+        try:
+            return joblib.load(model_path)
+        except FileNotFoundError:
+            return None
+        except Exception:
+            return None
+        
+    def post(self, request, *args, **kwargs):
+        if self.model is None:
+            return Response(
+                {"error": "Model could not be loaded. Please check the server configuration."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        serializer = Yield_Prediction_Serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data_df = pd.DataFrame([serializer.validated_data])
+
+        try:
+            prediction = self.model.predict(data_df)[0] * data_df.at[0, "Area"]
+            return Response({"prediction": prediction}, status=status.HTTP_200_OK)
         except IndexError:
             return Response({"error": "Model did not return a prediction."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:

@@ -18,3 +18,13 @@ class Fertilizer_Prediction_Serializer(serializers.Serializer):
     Nitrogen = serializers.FloatField()
     Potassium = serializers.FloatField()
     Phosphorous = serializers.FloatField()
+
+class Yield_Prediction_Serializer(serializers.Serializer):
+    Crop = serializers.CharField()
+    Crop_Year = serializers.IntegerField()
+    Season = serializers.CharField()
+    State = serializers.CharField()
+    Area = serializers.FloatField()
+    Annual_Rainfall = serializers.FloatField()
+    Fertilizer = serializers.FloatField()
+    Pesticide = serializers.FloatField()
