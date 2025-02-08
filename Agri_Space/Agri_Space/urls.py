@@ -15,8 +15,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.views.i18n import set_language
+from schema_graph.views import Schema
+
+admin.site.site_header = "Agri Space Admin"
+admin.site.site_title = "Agri Space"
+admin.site.index_title = "Welcome to the Agri Space"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('Users.urls')),
+    path('schema/', Schema.as_view()),
+    
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
