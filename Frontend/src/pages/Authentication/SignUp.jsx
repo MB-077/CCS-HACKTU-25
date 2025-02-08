@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import { IoPersonOutline } from 'react-icons/io5';
 import { BsTelephone } from 'react-icons/bs';
+// import { Idata } from '../../Interface/Interfaces';
+import { post } from '../../ApiUtils/apiUtils';
 
-interface Idata {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  phone_number?: number;
-  password?: string;
-  confirm_password?: string;
-}
-
-const defaultData: Idata = {
+const defaultData = {
   first_name: '',
   last_name: '',
   email: '',
@@ -22,21 +15,27 @@ const defaultData: Idata = {
   confirm_password: '',
 };
 
-const SignUp: React.FC = () => {
-  const [data, setData] = useState<Idata>(defaultData);
+const SignUp = () => {
+  const [data, setData] = useState(defaultData);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (data.password !== data.confirm_password) {
       alert('Password does not match');
       return;
     }
 
-    console.log(data, 'submitted');
+    const response = await post(data, 'register/');
+    console.log(response);
+    console.log(data);
+
+    localStorage.setItem('token', response.data.token);
+    navigate('/profile');
     setData(defaultData);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prev) => ({
       ...prev,
