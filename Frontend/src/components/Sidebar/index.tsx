@@ -195,7 +195,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                 }}
               </SidebarLinkGroup>
               {/* <!-- Menu Item Dashboard --> */}
-
+              <ul className="mb-6 flex flex-col gap-1.5">
+        {/* ... existing menu items */}
+        <li>
+          <NavLink
+            to="/sensor-dashboard" // Link to the SensorDashboard
+            className={({ isActive }) =>
+              'group relative flex items-center gap-2.5 rounded-md px-4 py-2 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
+              (isActive && '!text-white')
+            }
+          >
+            Sensor Dashboard
+          </NavLink>
+        </li>
+        </ul>
               {/* <!-- Menu Item Calendar --> */}
               <li>
                 <NavLink
