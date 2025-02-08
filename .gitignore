@@ -178,6 +178,9 @@ __pycache__/
 *.pyc
 **/_pycache_/
 .env
+pyproject.toml
+poetry.lock
 
 Agri_Space/Agri_Space/settings.py
 /Agri_Space/Users/migrations
+migrations/
