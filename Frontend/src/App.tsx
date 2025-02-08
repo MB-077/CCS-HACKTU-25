@@ -19,6 +19,7 @@ import DefaultLayout from './layout/DefaultLayout';
 import PricingPage from './pages/Sensor/page';
 import IrrigationPage from './pages/Irrigation/Irrigation';
 import SensorDashboard from './pages/Dashboard/SensorDashboard';
+import LoginForm from './pages/Form/LoginForm';
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
@@ -36,7 +37,7 @@ function App() {
   ) : (
     <DefaultLayout>
       <Routes>
-      <Route
+        <Route
           path="/sensor-dashboard" // Add this route
           element={
             <>
@@ -168,6 +169,15 @@ function App() {
             <>
               <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <SignUp />
+            </>
+          }
+        />
+        <Route
+          path="/userCredentials"
+          element={
+            <>
+              <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <LoginForm />
             </>
           }
         />
