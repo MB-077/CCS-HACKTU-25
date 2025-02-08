@@ -7,12 +7,14 @@ from rest_framework import status
 import joblib
 import pandas as pd
 from sklearn.exceptions import NotFittedError
+from sklearn.exceptions import EncoderError
 
 # Local Imports
 from .serializers import (
     Crop_Recommendation_Serializer, 
     Fertilizer_Prediction_Serializer, 
     Yield_Prediction_Serializer,
+    Optimal_RGB_Serializer,
 )
 
 # Create your views here.
@@ -130,6 +132,53 @@ class Yield_Prediction(APIView):
         try:
             prediction = self.model.predict(data_df)[0] * data_df.at[0, "Area"]
             return Response({"prediction": prediction}, status=status.HTTP_200_OK)
+        except IndexError:
+            return Response({"error": "Model did not return a prediction."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class Optimal_RGB(APIView):
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.model_r, self.model_g, self.model_b, self.encoder = self.load_model()
+
+    @staticmethod
+    def load_model():
+        """Importing the Model and Encoder with Error Handling."""
+        encoder = 'Ml_model/trained_data/optimal_rgb/label_encoder_rgb.pkl'
+        r = 'Ml_model/trained_data/optimal_rgb/r_model.pkl'
+        g = 'Ml_model/trained_data/optimal_rgb/g_model.pkl'
+        b = 'Ml_model/trained_data/optimal_rgb/b_model.pkl'
+        
+        try:
+            return joblib.load(r), joblib.load(g), joblib.load(b), joblib.load(encoder)
+        except FileNotFoundError:
+            return None, None, None, None
+        except Exception:
+            return None, None, None, None
+    
+    def post(self, request, *args, **kwargs):
+        serializer = Optimal_RGB_Serializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            data = self.encoder.transform([serializer.validated_data])
+        except EncoderError as e:
+            return Response({"error": f"Received the following errors while Encoding.\n\n{str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            prediction_r = self.model_r.predict(data)
+            prediction_g = self.model_g.predict(data)
+            prediction_b = self.model_b.predict(data)
+            return Response({
+                "prediction_r": prediction_r[0],
+                "prediction_g": prediction_g[0],
+                "prediction_b": prediction_b[0]
+            }, status=status.HTTP_200_OK)
         except IndexError:
             return Response({"error": "Model did not return a prediction."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:

@@ -28,3 +28,17 @@ class Yield_Prediction_Serializer(serializers.Serializer):
     Annual_Rainfall = serializers.FloatField()
     Fertilizer = serializers.FloatField()
     Pesticide = serializers.FloatField()
+
+class Irrigation_Prediction_Serilizer(serializers.Serializer):
+    Crop_Type = serializers.CharField()
+    Crop_Days = serializers.IntegerField()
+
+
+class Optimal_RGB_Serializer(serializers.Serializer):
+    R = serializers.FloatField()
+    G = serializers.FloatField()
+    B = serializers.FloatField()
+    Crop_Type = serializers.CharField()
+    Temperature = serializers.FloatField()
+    Humidity = serializers.FloatField()
+    PPFD = serializers.FloatField()

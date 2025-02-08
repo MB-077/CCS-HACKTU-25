@@ -29,7 +29,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Users.urls')),
     path('schema/', Schema.as_view()),
-    
+    path('telephony/', include('telephony.urls')),
+    path('models/', include('Ml_model.urls')),
 ]
 
 if settings.DEBUG:
