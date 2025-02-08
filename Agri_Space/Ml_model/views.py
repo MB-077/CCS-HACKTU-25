@@ -15,6 +15,7 @@ from .serializers import (
     Fertilizer_Prediction_Serializer, 
     Yield_Prediction_Serializer,
     Optimal_RGB_Serializer,
+    Irrigation_Prediction_Serilizer,
 )
 
 # Create your views here.
@@ -137,7 +138,7 @@ class Yield_Prediction(APIView):
         except Exception as e:
             return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-
+# TO BE TESTED
 class Optimal_RGB(APIView):
     
     def __init__(self, **kwargs):
@@ -178,6 +179,46 @@ class Optimal_RGB(APIView):
                 "prediction_r": prediction_r[0],
                 "prediction_g": prediction_g[0],
                 "prediction_b": prediction_b[0]
+            }, status=status.HTTP_200_OK)
+        except IndexError:
+            return Response({"error": "Model did not return a prediction."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# TO BE TESTED
+class Iriigation_Prediction(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, *kwargs)
+        self.model, self.encoder = self.load_model()
+    
+    @staticmethod
+    def load_model():
+        """Importing the Model and Encoder with Error Handling."""
+        model = 'Ml_model/trained_data/irrigation_prediction/irrigation_model.pkl'
+        encoder = 'Ml_model/trained_data/irrigation_prediction/label_encoder_irrigation.pkl'
+        
+        try:
+            return joblib.load(model), joblib.load(encoder)
+        except FileNotFoundError:
+            return None, None
+        except Exception:
+            return None, None
+    
+    def post(self, request, *args, **kwargs):
+        serializer = Irrigation_Prediction_Serilizer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            data = self.encoder.transform([serializer.validated_data])
+        except EncoderError as e:
+            return Response({"error": f"Received the following errors while Encoding.\n\n{str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            prediction = self.model.predict(data)
+            return Response({
+                "prediction": True if prediction[0] else False,
             }, status=status.HTTP_200_OK)
         except IndexError:
             return Response({"error": "Model did not return a prediction."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

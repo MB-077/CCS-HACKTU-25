@@ -30,8 +30,11 @@ class Yield_Prediction_Serializer(serializers.Serializer):
     Pesticide = serializers.FloatField()
 
 class Irrigation_Prediction_Serilizer(serializers.Serializer):
-    Crop_Type = serializers.CharField()
-    Crop_Days = serializers.IntegerField()
+    CropType = serializers.CharField()
+    CropDays = serializers.IntegerField()
+    temperature = serializers.FloatField()
+    Humidity = serializers.FloatField()
+    SoilMoisturePer = serializers.FloatField()
 
 
 class Optimal_RGB_Serializer(serializers.Serializer):

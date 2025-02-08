@@ -187,3 +187,4 @@ migrations/
 Agri_Space/locale/
 
 /Agri_Space/templates/admin
+Agri_Space/requirements.txt
