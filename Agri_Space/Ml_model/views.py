@@ -7,7 +7,6 @@ from rest_framework import status
 import joblib
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from sklearn.exceptions import EncoderError
 
 # Local Imports
 from .serializers import (
@@ -166,10 +165,7 @@ class Optimal_RGB(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            data = self.encoder.transform([serializer.validated_data])
-        except EncoderError as e:
-            return Response({"error": f"Received the following errors while Encoding.\n\n{str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        data = self.encoder.transform([serializer.validated_data])
 
         try:
             prediction_r = self.model_r.predict(data)
@@ -186,7 +182,7 @@ class Optimal_RGB(APIView):
             return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 # TO BE TESTED
-class Iriigation_Prediction(APIView):
+class Irrigation_Prediction(APIView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, *kwargs)
         self.model, self.encoder = self.load_model()
