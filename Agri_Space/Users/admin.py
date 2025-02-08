@@ -40,7 +40,7 @@ class UserProfileAdmin(ModelAdmin):
     def thumbnail(self, object):
         return format_html('<img src="{}" width="30" style="border-radius: 50px;">'.format(object.profile_picture.url))
     thumbnail.short_description = 'Profile Picture'
-    list_display = ('thumbnail', 'user', 'city', 'state', 'country', 'postal_code',)
+    list_display = ('thumbnail', 'user', 'country', 'state', 'city', 'district', 'postal_code',)
     list_display_links = ('thumbnail', 'user',)
     list_filter = ('city', 'state', 'country')
     
@@ -54,7 +54,7 @@ class GroupAdmin(BaseGroupAdmin, ModelAdmin):
 
 
 class UserImportantDetailsAdmin(ModelAdmin):
-    list_display = ('user', 'state', 'crop_grown', 'planting_date',)
+    list_display = ('user', 'state', 'crop_grown', 'planting_date', 'land_area', 'receive_email', 'receive_push_notification', 'receive_sms',)
     list_filter = ('state', 'planting_date',)
     search_fields = ('user', 'state', 'crop_grown',)
     

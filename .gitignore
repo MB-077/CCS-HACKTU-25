@@ -180,3 +180,4 @@ __pycache__/
 .env
 
 Agri_Space/Agri_Space/settings.py
+/Agri_Space/Users/migrations

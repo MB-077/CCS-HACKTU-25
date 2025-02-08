@@ -110,7 +110,7 @@ class UserImportantDetails(models.Model):
     land_area = models.FloatField(blank=True, null=True, default=0, verbose_name=_('Land Area'))
     planting_date = models.DateField(blank=True, null=True, verbose_name=_('Planting Date'))
     receive_email = models.BooleanField(default=True, verbose_name=_('Receive Email'))
-    receive_push_notification = models.BooleanField(default=False, verbose_name=_('Receive Email'))
+    receive_push_notification = models.BooleanField(default=False, verbose_name=_('Receive Push Notification'))
     receive_sms = models.BooleanField(default=False, verbose_name=_('Receive SMS'))
     
     def __str__(self):
