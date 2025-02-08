@@ -16,6 +16,7 @@ import Tables from './pages/Tables';
 import Alerts from './pages/UiElements/Alerts';
 import Buttons from './pages/UiElements/Buttons';
 import DefaultLayout from './layout/DefaultLayout';
+import IrrigationPage from './pages/Irrigation/Irrigation';
 import SensorDashboard from './pages/Dashboard/SensorDashboard';
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -40,6 +41,15 @@ function App() {
             <>
               <PageTitle title="Sensor Dashboard" />
               <SensorDashboard />
+            </>
+          }
+        />
+        <Route
+          path="/irrigation" // Add this route for the Irrigation page
+          element={
+            <>
+              <PageTitle title="Irrigation Control Panel" />
+              <IrrigationPage />
             </>
           }
         />
