@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework import status
+from rest_framework import viewsets
+from .serializers import UserProfileSerializer, UserImportantDetailsSerializer
 
 # General imports
 from .serializers import *
@@ -138,3 +140,42 @@ def change_password(request):
             return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Current password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def userprofile_view(request):
+    if request.method == 'POST':
+        serializer = UserProfileSerializer(data=request.data)
+        data = {}
+
+        try:
+            if serializer.is_valid():
+                account = serializer.save()
+                data['response'] = 'Registration Successful!'
+                data['registration_id'] = account.id
+                data['first_name'] = account.first_name
+                data['last_name'] = account.last_name
+                data['phone_number'] = account.phone_number
+                data['email'] = account.email
+                
+                return Response(data, status=status.HTTP_201_CREATED)
+            else:
+                error_message = list(serializer.errors.values())[0][0] if serializer.errors else 'Validation error'
+                return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+
+        except serializers.ValidationError as e:
+            error_message = list(e.detail.values())[0][0] if e.detail else 'Validation error'
+            return Response({'error': error_message}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+
+
+class UserImportantDetailsViewSet(viewsets.ModelViewSet):
+    queryset = UserImportantDetails.objects.all()
+    serializer_class = UserImportantDetailsSerializer

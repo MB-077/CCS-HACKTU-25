@@ -77,5 +77,44 @@ class CustomAuthTokenSerializer(serializers.Serializer):
 
         attrs['user'] = authenticated_user
         return attrs
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
     
+    class Meta:
+        model = UserProfile
+        fields = [
+            'id',
+            'user',
+            'address_line_1',
+            'address_line_2',
+            'profile_picture',
+            'country',
+            'state',
+            'city',
+            'district',
+            'postal_code',
+            'latitude',
+            'longitude',
+            'full_address',
+        ]
+
+
+class UserImportantDetailsSerializer(serializers.ModelSerializer):
+    user_full_name = serializers.CharField(source='user.full_name', read_only=True)
+
+    class Meta:
+        model = UserImportantDetails
+        fields = [
+            'id',
+            'user',
+            'state',
+            'crop_grown',
+            'land_area',
+            'planting_date',
+            'receive_email',
+            'receive_push_notification',
+            'receive_sms',
+            'user_full_name',
+        ]
 
