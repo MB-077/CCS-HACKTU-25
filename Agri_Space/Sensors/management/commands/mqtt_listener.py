@@ -6,6 +6,8 @@ from decouple import config
 from datetime import datetime, timedelta
 import signal
 import sys
+import utils.mongo_connection
+from mongo_data.mongo_models import SensorDataDoc, ChildNodeSensorDataDoc
 
 BASE_NODE_SENSOR_DATA_TOPIC = "agri_space/sensors/data"
 RELAY_STATE_TOPIC = "agri_space/relay/state"
@@ -32,18 +34,20 @@ class Command(BaseCommand):
 
                 if msg.topic == DEVICE_REGISTER_TOPIC:
                     handle_device_registration(json.loads(payload))
-        
-                if msg.topic == CHILD_NODE_SENSOR_DATA_TOPIC:
-                    if payload:
-                        handle_child_node_sensor_data(json.loads(payload))
-                    else:
-                        print(f"Received empty payload on {msg.topic}")
                     
                 if msg.topic == BASE_NODE_SENSOR_DATA_TOPIC:
                     if payload:
                         handle_base_node_sensor_data(json.loads(payload))
+                        handle_base_node_sensor_data_mongo(json.loads(payload))
                     else:
                         print(f"Received empty payload on {msg.topic}")
+                        
+                if msg.topic == CHILD_NODE_SENSOR_DATA_TOPIC:
+                    if payload:
+                        handle_child_node_sensor_data(json.loads(payload))
+                        handle_child_node_sensor_data_mongo(json.loads(payload))
+                    else:
+                        print(f"Received empty payload on {msg.topic}")        
 
                 if msg.topic == RELAY_STATE_REQUEST_TOPIC:
                     if payload == "request":
@@ -128,6 +132,36 @@ class Command(BaseCommand):
             except Exception as e:
                 print(f"Error saving base node sensor data: {e}")
                 
+        
+        def handle_base_node_sensor_data_mongo(payload):
+            try:
+                sensor_doc = SensorDataDoc(
+                    esp_device_id=payload.get('esp_device_id'),
+                    dht11_humidity=payload.get('dht11_humidity'),
+                    dht11_temperature=payload.get('dht11_temperature'),
+                    soil_moisture_raw_1=payload.get('soil_moisture_raw_1'),
+                    soil_moisture_percent_1=payload.get('soil_moisture_percent_1'),
+                    lux=payload.get('lux'),
+                    atm_pressure=payload.get('atm_pressure'),
+                    apds_ambient=payload.get('apds_ambient'),
+                    apds_red=payload.get('apds_red'),
+                    apds_green=payload.get('apds_green'),
+                    apds_blue=payload.get('apds_blue'),
+                    mq_2_raw=payload.get('mq_2_raw'),
+                    mq_2_percent=payload.get('mq_2_percent'),
+                    mq_135_raw=payload.get('mq_135_raw'),
+                    mq_135_percent=payload.get('mq_135_percent'),
+                    flow_rate=payload.get('flow_rate'),
+                    flow_measurement_duration_sec=payload.get('flow_measurement_duration_sec'),
+                    flow=payload.get('flow'),
+                    timestamp=datetime.utcnow(),
+                )
+                sensor_doc.save()
+                print("Base Node Sensor data saved successfully to MongoDB.")
+            except Exception as e:
+                print(f"Error saving base node sensor data to MongoDB: {e}")
+        
+                
         def handle_child_node_sensor_data(payload):
             try:
                 child_node_data = ChildNodeSensorData.objects.create(
@@ -146,6 +180,26 @@ class Command(BaseCommand):
                     
             except Exception as e:
                 print(f"Error saving child node sensor data: {e}")
+                
+        def handle_child_node_sensor_data_mongo(payload):
+            try:
+                child_node_data_doc = ChildNodeSensorDataDoc(
+                    esp_device_id=payload.get('esp_device_id'),
+                    child_node_id=payload.get('child_node_id'),
+                    node_dht11_humidity=payload.get('node_dht11_humidity'),
+                    node_dht11_temperature=payload.get('node_dht11_temperature'),
+                    node_soil_moisture_raw_2=payload.get('node_soil_moisture_raw_2'),
+                    node_soil_moisture_percent_2=payload.get('node_soil_moisture_percent_2'),
+                    node_DS18B20_temperature=payload.get('node_DS18B20_temperature'),
+                    node_rain_raw=payload.get('node_rain_raw'),
+                    node_rain_percent=payload.get('node_rain_percent'),
+                    timestamp=datetime.utcnow(),
+                )
+                child_node_data_doc.save()
+                print("Child Node Sensor Data saved successfully to MongoDB.")
+                
+            except Exception as e:
+                print(f"Error saving child node sensor data to MongoDB: {e}")
                 
         def signal_handler(sig, frame):
             print("Interrupt signal received. Shutting down MQTT client...")
