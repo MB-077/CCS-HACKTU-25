@@ -30,7 +30,7 @@ urlpatterns = [
     path('', include('Users.urls')),
     path('schema/', Schema.as_view()),
     path('telephony/', include('telephony.urls')),
-    path('models/', include('Ml_model.urls')),
+    path('ml_model/', include('Ml_model.urls')),
 ]
 
 if settings.DEBUG:

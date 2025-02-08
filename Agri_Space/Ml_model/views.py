@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 # Third-party Libraries
+import os
 import joblib
 import pandas as pd
 from sklearn.exceptions import NotFittedError
@@ -137,35 +138,42 @@ class Yield_Prediction(APIView):
         except Exception as e:
             return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-# TO BE TESTED
+
 class Optimal_RGB(APIView):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model_r, self.model_g, self.model_b, self.encoder = self.load_model()
+        self.model_r, self.model_g, self.model_b, self.encoder, self.err = self.load_model()
 
     @staticmethod
     def load_model():
         """Importing the Model and Encoder with Error Handling."""
         encoder = 'Ml_model/trained_data/optimal_rgb/label_encoder_rgb.pkl'
-        r = 'Ml_model/trained_data/optimal_rgb/r_model.pkl'
-        g = 'Ml_model/trained_data/optimal_rgb/g_model.pkl'
-        b = 'Ml_model/trained_data/optimal_rgb/b_model.pkl'
+        r = 'Ml_model/trained_data/optimal_rgb/model_r.pkl'
+        g = 'Ml_model/trained_data/optimal_rgb/model_g.pkl'
+        b = 'Ml_model/trained_data/optimal_rgb/model_b.pkl'
         
         try:
-            return joblib.load(r), joblib.load(g), joblib.load(b), joblib.load(encoder)
-        except FileNotFoundError:
-            return None, None, None, None
-        except Exception:
-            return None, None, None, None
+            return joblib.load(r), joblib.load(g), joblib.load(b), joblib.load(encoder), None
+        except FileNotFoundError as e:
+            return None, None, None, None, str(e)
+        except Exception as e:
+            return None, None, None, None, str(e)
     
     def post(self, request, *args, **kwargs):
         serializer = Optimal_RGB_Serializer(data=request.data)
 
+        if self.model_r is None or self.model_g is None or self.model_b is None:
+            return Response({"error": f"RGB models have not been loaded. {self.err}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        if self.encoder is None:
+            return Response({"error": f"Label encoder has not been loaded. {self.err}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        data = self.encoder.transform([serializer.validated_data])
+        data = serializer.validated_data
+        data["Crop_Type"] = self.encoder.transform([data["Crop_Type"]])
+        data = pd.DataFrame([data.values()], columns=data.keys())
 
         try:
             prediction_r = self.model_r.predict(data)
@@ -181,32 +189,40 @@ class Optimal_RGB(APIView):
         except Exception as e:
             return Response({"error": f"Unexpected error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-# TO BE TESTED
+
 class Irrigation_Prediction(APIView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, *kwargs)
-        self.model, self.encoder = self.load_model()
+        self.model, self.encoder, self.err = self.load_model()
     
     @staticmethod
     def load_model():
         """Importing the Model and Encoder with Error Handling."""
-        model = 'Ml_model/trained_data/irrigation_prediction/irrigation_model.pkl'
+        model = 'Ml_model/trained_data/irrigation_prediction/trained_model_irrigation.pkl'
         encoder = 'Ml_model/trained_data/irrigation_prediction/label_encoder_irrigation.pkl'
         
         try:
-            return joblib.load(model), joblib.load(encoder)
-        except FileNotFoundError:
-            return None, None
-        except Exception:
-            return None, None
+            return joblib.load(model), joblib.load(encoder), None
+        except FileNotFoundError as e:
+            return None, None, str(e)
+        except Exception as e:
+            return None, None, str(e)
     
     def post(self, request, *args, **kwargs):
         serializer = Irrigation_Prediction_Serilizer(data=request.data)
 
+        if self.model is None:
+            return Response({"error": f"Model has not been loaded. {self.err}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        if self.encoder is None:
+            return Response({"error": f"Label encoder has not been loaded. {self.err}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        data = self.encoder.transform([serializer.validated_data])
+        data = serializer.validated_data
+        data["CropType"] = self.encoder.transform([serializer.validated_data["CropType"]])
+        data = pd.DataFrame([data.values()], columns=data.keys())
         
         try:
             prediction = self.model.predict(data)
