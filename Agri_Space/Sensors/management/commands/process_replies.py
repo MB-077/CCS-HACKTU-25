@@ -58,7 +58,6 @@ class Command(BaseCommand):
             return
 
         body_lower = body.lower().strip().split('\n')[0]
-        self.log_event('email', f"Processing email: {body_lower}")
 
         print(f"Email body received: {body_lower}")
 
@@ -67,7 +66,6 @@ class Command(BaseCommand):
 
         if has_stop and has_start:
             self.reply_email(from_email, "Your email contains conflicting commands. Please send only one command.")
-            self.log_event('error', "Conflicting commands found in email.")
             return
 
         if has_stop:
@@ -102,7 +100,6 @@ class Command(BaseCommand):
 
         if existing_cycle:
             self.reply_email(from_email, f"Irrigation is already scheduled for {duration} minutes.")
-            self.log_event('relay', f"Irrigation already scheduled for {duration} minutes.")
             return
 
         relay_state, created = RelayState.objects.get_or_create(
@@ -119,27 +116,23 @@ class Command(BaseCommand):
             duration=timedelta(minutes=duration),
         )
         self.reply_email(from_email, f"Irrigation has started for {duration} minutes.")
-        self.log_event('relay', f"Irrigation started for {duration} minutes.")
 
 
     def handle_case_2(self, from_email):
         latest_sensor_data = SensorData.objects.last()
         if not latest_sensor_data:
             self.reply_email(from_email, "No sensor data available to determine irrigation requirements.")
-            self.log_event('error', "No sensor data available.")
             return
 
         crop = CropsOptimalConditions.objects.filter(crop_name="Cotton").first()
         if not crop:
             self.reply_email(from_email, "No crop-specific data found for irrigation requirements.")
-            self.log_event('error', "No crop data found for :", crop)
             return
 
         optimal_soil_moisture = crop.optimal_soil_moisture_percentage
         current_soil_moisture = latest_sensor_data.soil_moisture_percent_1
         if current_soil_moisture >= optimal_soil_moisture:
             self.reply_email(from_email, "Soil moisture is already at or above the optimal level. No irrigation needed.")
-            self.log_event('relay', "Irrigation not needed due to sufficient soil moisture.")
             return
 
         moisture_increase_rate = 1
