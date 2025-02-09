@@ -32,6 +32,8 @@ urlpatterns = [
     path('telephony/', include('telephony.urls')),
     path('ml_model/', include('Ml_model.urls')),
     path('translate/', include('translation.urls')),
+    path('sensors/', include('Sensors.urls')),
+    path('i18n/', set_language, name='set_language'),
 ]
 
 if settings.DEBUG:

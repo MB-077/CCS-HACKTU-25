@@ -45,3 +45,17 @@ class Optimal_RGB_Serializer(serializers.Serializer):
     Temperature = serializers.FloatField()
     Humidity = serializers.FloatField()
     PPFD = serializers.FloatField()
+    
+
+class Optimal_Crop_Conditions_Prediction_Serializer(serializers.Serializer):
+    crop_type = serializers.CharField()
+    growth_stage = serializers.CharField()
+    state = serializers.CharField()
+    soil_type = serializers.CharField()
+    temperature = serializers.FloatField()
+    humidity = serializers.FloatField()
+    pressure = serializers.FloatField()
+    solar_intensity = serializers.FloatField()
+    soil_moisture = serializers.FloatField()
+    rainfall = serializers.FloatField()
+    soil_temperature = serializers.FloatField()

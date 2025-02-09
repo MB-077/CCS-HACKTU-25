@@ -1,4 +1,3 @@
-import uuid
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime, timedelta
@@ -156,3 +155,112 @@ def sensor_data_post_save(sender, instance, created, **kwargs):
 @receiver(post_save, sender=ChildNodeSensorData)
 def child_node_sensor_data_post_save(sender, instance, created, **kwargs):
     broadcast_sensor_update(instance)
+    
+
+@receiver(post_save, sender=SensorData)
+def send_notification(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    try:
+        active_user_status = UserStatus.objects.filter(online_status=True).first()
+        if not active_user_status:
+            print("No active user found.")
+            return
+
+        active_user = active_user_status.user
+        current_crop_conditions = CropsOptimalConditions.objects.filter(user=active_user).first()
+        if not current_crop_conditions:
+            print(f"No optimal conditions found for the crop '{active_user.important_details.crop_grown}'.")
+            return
+
+        conditions_failed = {}
+
+        if instance.soil_moisture_percent_1 is not None and \
+           current_crop_conditions.optimal_soil_moisture_percentage_lower_bound is not None and \
+           current_crop_conditions.optimal_soil_moisture_percentage_upper_bound is not None:
+            if (instance.soil_moisture_percent_1 < current_crop_conditions.optimal_soil_moisture_percentage_lower_bound) or \
+               (instance.soil_moisture_percent_1 > current_crop_conditions.optimal_soil_moisture_percentage_upper_bound):
+                conditions_failed['soil_moisture'] = True
+
+        if instance.dht11_temperature is not None and \
+           current_crop_conditions.optimal_temperature_lower_bound is not None and \
+           current_crop_conditions.optimal_temperature_upper_bound is not None:
+            if (instance.dht11_temperature < current_crop_conditions.optimal_temperature_lower_bound) or \
+               (instance.dht11_temperature > current_crop_conditions.optimal_temperature_upper_bound):
+                conditions_failed['temperature'] = True
+
+        if instance.dht11_humidity is not None and \
+           current_crop_conditions.optimal_humidity_lower_bound is not None and \
+           current_crop_conditions.optimal_humidity_upper_bound is not None:
+            if (instance.dht11_humidity < current_crop_conditions.optimal_humidity_lower_bound) or \
+               (instance.dht11_humidity > current_crop_conditions.optimal_humidity_upper_bound):
+                conditions_failed['humidity'] = True
+
+        if instance.lux is not None and \
+           current_crop_conditions.optimal_lux_lower_bound is not None and \
+           current_crop_conditions.optimal_lux_upper_bound is not None:
+            if (instance.lux < current_crop_conditions.optimal_lux_lower_bound) or \
+               (instance.lux > current_crop_conditions.optimal_lux_upper_bound):
+                conditions_failed['lux'] = True
+
+        if not conditions_failed:
+            return
+        
+        if len(conditions_failed) == 1:
+            condition = list(conditions_failed.keys())[0]
+            template_map = {
+                'soil_moisture': 'Sensors/irrigation_update.html', 
+                'temperature': 'Sensors/temperature_update.html',
+                'humidity': 'Sensors/humidity_update.html',
+                'lux': 'Sensors/lux_update.html',
+            }
+            email_template = template_map.get(condition)
+            mail_subject = f"Irrigation Update: {condition.replace('_', ' ').title()} Alert"
+            cache_key = f"notification_sent_{condition}_sensor_{instance.esp_device_id.esp_device_id}"
+        else:
+            email_template = 'Sensors/combined_update.html'
+            mail_subject = "Irrigation Update: Multiple Sensor Alerts"
+            conditions_key = "_".join(sorted(conditions_failed.keys()))
+            cache_key = f"notification_sent_{conditions_key}_sensor_{instance.esp_device_id.esp_device_id}"
+
+        cooldown_period = 20  # seconds
+
+        if cache.get(cache_key):
+            print("Notification already sent recently; skipping.")
+            return
+        
+        current_site = Site.objects.get_current()
+        context = {
+            'sensor_data': instance,
+            'domain': current_site.domain,
+            'current_soil_moisture': instance.soil_moisture_percent_1,
+            'optimal_soil_moisture_lower': current_crop_conditions.optimal_soil_moisture_percentage_lower_bound,
+            'optimal_soil_moisture_upper': current_crop_conditions.optimal_soil_moisture_percentage_upper_bound,
+            'current_temperature': instance.dht11_temperature,
+            'optimal_temperature_lower': current_crop_conditions.optimal_temperature_lower_bound,
+            'optimal_temperature_upper': current_crop_conditions.optimal_temperature_upper_bound,
+            'current_humidity': instance.dht11_humidity,
+            'optimal_humidity_lower': current_crop_conditions.optimal_humidity_lower_bound,
+            'optimal_humidity_upper': current_crop_conditions.optimal_humidity_upper_bound,
+            'current_lux': instance.lux,
+            'optimal_lux_lower': current_crop_conditions.optimal_lux_lower_bound,
+            'optimal_lux_upper': current_crop_conditions.optimal_lux_upper_bound,
+            'conditions_failed_text': ', '.join(condition.replace('_', ' ').title() for condition in conditions_failed.keys()),
+            'instructions': 'Reply with the appropriate command to start/stop irrigation.'
+        }
+        message = render_to_string(email_template, context)
+
+        to_email = config('EMAIL_HOST_USER') 
+        email_message = EmailMessage(mail_subject, message, to=[to_email])
+        email_message.content_subtype = "html"
+        
+        try:
+            email_message.send()
+            print("Email sent.")
+            cache.set(cache_key, True, timeout=cooldown_period)
+        except Exception as e:
+            print(f"Error sending email: {e}")
+
+    except Exception as e:
+        print(f"Error in send_notification signal: {e}")
