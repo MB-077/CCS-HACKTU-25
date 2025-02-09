@@ -81,3 +81,9 @@ class UserStatusAdmin(ModelAdmin):
     search_fields = ('user',)
     
 admin.site.register(UserStatus, UserStatusAdmin)
+
+
+class StateDataAdmin(ModelAdmin):
+    list_display = ('indian_state', 'soil_type', 'avg_monthly_rainfall',)
+    
+admin.site.register(StateData, StateDataAdmin)

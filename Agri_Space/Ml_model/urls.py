@@ -7,4 +7,5 @@ urlpatterns = [
     path('yield/', views.Yield_Prediction.as_view(), name='predict'),
     path('rgb/', views.Optimal_RGB.as_view(), name='predict_rgb'),
     path('irrigation/', views.Irrigation_Prediction.as_view(), name='predict_irrigation'),
+    path('optimal-conditions/', views.OptimalCropConditionsPrediction.as_view(), name='optimal-conditions'),
 ]

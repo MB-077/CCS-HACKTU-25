@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Account, UserProfile, UserStatus, Token
+from .models import Account, UserProfile, UserStatus, Token, UserImportantDetails
+from Ml_model.models import UserCrop
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.utils import timezone
 
@@ -34,4 +35,12 @@ def set_user_offline(sender, request, user, **kwargs):
     UserStatus.objects.update_or_create(
         user=user,
         defaults={'online_status': False}
+    )
+
+@receiver(post_save, sender=UserImportantDetails)
+def update_user_crop(sender, instance, created, **kwargs):
+    UserCrop.objects.update_or_create(
+        user=instance.user,
+        crop=instance.crop_grown,
+        planting_date=instance.planting_date
     )

@@ -191,3 +191,5 @@ Agri_Space/requirements.txt
 /Agri_Space/Ml_model/trained_data/optimal_conditions/
 /Agri_Space/Ml_model/csv_files/
 
+/Agri_Space/Sensors/templates/Sensors
+/Agri_Space/Ml_model/templates/Ml_model

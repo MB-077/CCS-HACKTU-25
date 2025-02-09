@@ -155,3 +155,12 @@ class UserStatus(models.Model):
     class Meta:
         verbose_name = _('User Status')
         verbose_name_plural = _('User Statuses')
+        
+
+class StateData(models.Model):
+    indian_state = models.CharField(max_length=255)
+    soil_type = models.CharField(max_length=255)
+    avg_monthly_rainfall = models.FloatField()
+    
+    def __str__(self):
+        return f"{self.indian_state}: {self.soil_type} - {self.avg_monthly_rainfall}"
