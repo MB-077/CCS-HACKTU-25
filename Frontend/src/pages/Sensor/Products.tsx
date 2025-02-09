@@ -36,7 +36,7 @@ export default function Products({
                     className="flex justify-between text-emerald-700 bg-emerald-50 px-3 py-2 rounded-md"
                   >
                     <span>{sensor.name}</span>
-                    <span>${sensor.price}</span>
+                    <span>₹{sensor.price}</span>
                   </motion.li>
                 ))}
               </ul>
@@ -55,14 +55,14 @@ export default function Products({
                     className="flex justify-between text-emerald-700 bg-teal-50 px-3 py-2 rounded-md"
                   >
                     <span>{sensor.name}</span>
-                    <span>${sensor.price}</span>
+                    <span>₹{sensor.price}</span>
                   </motion.li>
                 ))}
               </ul>
             </div>
             <div className="text-2xl font-bold text-emerald-800 flex justify-between items-center mt-4 pt-4 border-t border-emerald-200">
               <span>Total:</span>
-              <span>${totalPrice}</span>
+              <span>₹{totalPrice}</span>
             </div>
           </>
         ) : (

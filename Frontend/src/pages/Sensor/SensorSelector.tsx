@@ -55,7 +55,7 @@ export default function SensorSelector({
               </div>
               <div>
                 <p className="text-2xl font-bold text-emerald-800 mb-3">
-                  ${sensor.price}
+                ₹{sensor.price}
                 </p>
                 <button
                   className={`w-full py-2 rounded text-white font-bold transition-colors ${

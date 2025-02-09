@@ -20,7 +20,7 @@ export const sensors: Sensor[] = [
     id: 'temp',
     name: 'Temperature Sensor',
     description: 'Monitor ambient temperature with high precision',
-    price: 29,
+    price: 100,
     features: [
       {
         id: 'temp1',
@@ -43,7 +43,7 @@ export const sensors: Sensor[] = [
     id: 'humid',
     name: 'Humidity Sensor',
     description: 'Track humidity levels for optimal comfort',
-    price: 35,
+    price: 100,
     features: [
       {
         id: 'humid1',
@@ -66,7 +66,7 @@ export const sensors: Sensor[] = [
     id: 'motion',
     name: 'Motion Sensor',
     description: 'Detect movement in your space',
-    price: 45,
+    price: 150,
     features: [
       {
         id: 'motion1',
@@ -89,7 +89,7 @@ export const sensors: Sensor[] = [
     id: 'light',
     name: 'Light Sensor',
     description: 'Measure and respond to ambient light levels',
-    price: 25,
+    price: 200,
     features: [
       {
         id: 'light1',
@@ -112,7 +112,7 @@ export const sensors: Sensor[] = [
     id: 'air',
     name: 'Air Quality Sensor',
     description: 'Monitor air quality for a healthier environment',
-    price: 59,
+    price: 260,
     features: [
       {
         id: 'air1',
