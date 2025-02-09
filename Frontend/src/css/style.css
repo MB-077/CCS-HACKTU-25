@@ -62,6 +62,12 @@
 }
 
 @layer components {
+  .border-border {
+    border-color: #E2E8F0; /* Define your custom border color */
+  }
+  .bg-background {
+    background-color: #F1F5F9; /* Define your custom background color */
+  }
 }
 
 @layer utilities {
