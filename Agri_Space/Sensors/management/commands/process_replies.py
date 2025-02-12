@@ -129,7 +129,7 @@ class Command(BaseCommand):
             self.reply_email(from_email, "No crop-specific data found for irrigation requirements.")
             return
 
-        optimal_soil_moisture = crop.optimal_soil_moisture_percentage
+        optimal_soil_moisture = crop.optimal_temperature_lower_bound
         current_soil_moisture = latest_sensor_data.soil_moisture_percent_1
         if current_soil_moisture >= optimal_soil_moisture:
             self.reply_email(from_email, "Soil moisture is already at or above the optimal level. No irrigation needed.")
